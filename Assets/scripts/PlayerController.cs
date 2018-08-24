@@ -4,19 +4,23 @@
     using System.Collections.Generic;
     using UnityEngine;
     using System.Collections;
+    using UnityEngine.UI;
 
     public class PlayerController : MonoBehaviour
     {
         public CharacterController controller;
-        private float speed = 0.1f;
-        private float gravity = -1.5f;
+        public Text VelText;
+        private float speed = 0.2f;
+        private float gravity = -0.1f;
         private int jumpTime;
         private IEnumerator coroutine;
         public Vector3 characterMovement;
         // Use this for initialization
         void Start()
         {
-
+            coroutine = Countdown(0.1f);
+            StartCoroutine(coroutine);
+            
         }
 
         // Update is called once per frame
@@ -24,41 +28,65 @@
         {
 
             //Character Movement
-            characterMovement = new Vector3(Input.GetAxisRaw("Horizontal"), 0, 0);
+            characterMovement = new Vector3(Input.GetAxisRaw("Horizontal"), characterMovement.y, 0);
             //Debug.Log(characterMovement);
             //Normalize the movement when no input
             if (characterMovement != Vector3.zero)
             {
-                characterMovement.Normalize();
+               // characterMovement.Normalize();
             }
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) && controller.isGrounded)
             {
-                jumpTime = 1;
+                //jumpTime = 5;
+
+                characterMovement.y = 1.0f;
             }
+
+            /*
             if (jumpTime > 0)
             {
-                coroutine = Countdown(0.5f);
-                StartCoroutine(coroutine);
-                characterMovement.y = 3.0f;
-
-
+                characterMovement.y = 1.5f;
             }
             applyGravity();
+            */
+            VelText.text = (characterMovement.ToString());
             controller.Move(characterMovement * speed);
+            
         }
 
         private IEnumerator Countdown(float waitTime)
         {
-            yield return new WaitForSeconds(waitTime);
-            jumpTime--;
-            Debug.Log(jumpTime);
+            while (true)
+            {
+                yield return new WaitForSeconds(waitTime);
+
+                if (controller.isGrounded == false)
+                {
+                    characterMovement.y += gravity;
+                    Debug.Log(characterMovement.y);
+                }
+                
+                
+                
+               
+                
+                /*
+               if (jumpTime > 0)
+               {
+                   jumpTime--;
+                   Debug.Log(jumpTime);
+               }
+               */
+            }
 
         }
 
         void applyGravity()
         {
+
             characterMovement.y += gravity;
+            Debug.Log(jumpTime);
         }
     }
 
