@@ -1,11 +1,17 @@
 fileFormatVersion: 2
 guid: 0ab8e7de4ec707a439a5a3ea7312a824
-timeCreated: 1535044559
+timeCreated: 1535144636
 licenseType: Pro
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - controller: {instanceID: 0}
+  - velText: {fileID: 114866907685753472, guid: a5911cf05ac56814f852a5eee6f8ca19,
+      type: 2}
+  - posText: {fileID: 114274834159609180, guid: 4d7178a6ea43eb0429e81ca410b91bd6,
+      type: 2}
+  - player: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
