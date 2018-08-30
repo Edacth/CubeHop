@@ -23,7 +23,7 @@
         //Declare the rest of them
         float highestPoint = 0;
         private float speed = 0.7f;
-        private float gravity = -4.5f;
+        private float gravity = -3.5f;
         private IEnumerator coroutine;
         public Vector3 characterMovement;
         public GameObject player;
@@ -50,6 +50,7 @@
             //Character Movement
             characterMovement = new Vector3(Input.GetAxisRaw("Horizontal"), 0, 0);
 
+            //Stop player movement if they are againt a wall
             if (isLeftWalled() && characterMovement.x < 0)
             {
                 characterMovement.x = 0;
@@ -59,55 +60,35 @@
                 characterMovement.x = 0;
             }
 
+            //Jumps if the player is grounded
             if (Input.GetKeyDown(KeyCode.Space) && isGrounded())
             {
                 //characterMovement.y = 0.25f;
                 rigidbody.velocity = new Vector3(rigidbody.velocity.x, 22.25f, rigidbody.velocity.z);
             }
 
-            if (Input.GetKeyDown(KeyCode.F) && isGrounded())
-            {
-                highestPoint = 0.0f;
-            }
-
-            if (player.transform.position.y > highestPoint)
-            {
-                highestPoint = player.transform.position.y;
-            }
-
-            if (characterMovement.y > -1.0f)
+            //Applies gravity to the player
+            if (characterMovement.y > 0.0f)
             {
                 characterMovement.y += gravity * Time.deltaTime;
             }
-
-            Debug.DrawRay(new Vector3(transform.position.x + 0.5f, transform.position.y, transform.position.z), new Vector3(0, -2.5f, 0), Color.blue);
-            Debug.DrawRay(new Vector3(transform.position.x + -0.5f, transform.position.y, transform.position.z), new Vector3(0, -2.5f, 0), Color.blue);
-
-
-            if (rigidbody.velocity.y < 0)
+            //Makes the player fall faster
+            else if (characterMovement.y <= 0)
             {
-                characterMovement += Vector3.up * gravity * (fallMultiplier - 1) * Time.deltaTime;
-
+                characterMovement.y += 1 * gravity * (fallMultiplier - 1) * Time.deltaTime;
+                Debug.Log("Falling");
             }
             rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
             characterMovement.x = characterMovement.x * speed;
             characterMovement.z = characterMovement.z * speed;
+
+            //Add the force to the player
             rigidbody.AddForce(characterMovement, ForceMode.Impulse);
 
             //Update the UI text
             VelTextObject.text = ("Velocity " + characterMovement.ToString());
             PosTextObject.text = ("Position " + player.transform.position.ToString());
             HighPointTextObject.text = ("" + isLeftWalled());
-
-        }
-
-        void applyGravity()
-        {
-            if (characterMovement.y > -1.0f)
-            {
-                characterMovement.y += gravity;
-            }
-
 
         }
 
