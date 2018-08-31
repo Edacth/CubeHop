@@ -44,10 +44,10 @@
         }
 
         // Update is called once per frame
-        void Update()
+        void FixedUpdate()
         {
 
-            //Character Movement
+            //Get horizonal input
             characterMovement = new Vector3(Input.GetAxisRaw("Horizontal"), 0, 0);
 
             //Stop player movement if they are againt a wall
@@ -60,15 +60,15 @@
                 characterMovement.x = 0;
             }
 
-            //Jumps if the player is grounded
+            //Checks if the player is grounded then jumps when space is pressed
             if (Input.GetKeyDown(KeyCode.Space) && isGrounded())
             {
                 //characterMovement.y = 0.25f;
-                rigidbody.velocity = new Vector3(rigidbody.velocity.x, 22.25f, rigidbody.velocity.z);
+                rigidbody.velocity = new Vector3(rigidbody.velocity.x, 25.25f, rigidbody.velocity.z);
             }
 
             //Applies gravity to the player
-            if (characterMovement.y > 0.0f)
+            if (characterMovement.y > 0.0f && isGrounded() == false)
             {
                 characterMovement.y += gravity * Time.deltaTime;
             }
