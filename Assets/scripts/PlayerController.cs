@@ -21,108 +21,128 @@
         public Canvas canvas;
 
         //Declare the rest of them
-        float highestPoint = 0;
-        private float speed = 0.7f;
-        private float gravity = -3.5f;
-        private IEnumerator coroutine;
+        private Rigidbody rb;
         public Vector3 characterMovement;
-        public GameObject player;
-        public float fallMultiplier = 2.5f;
+        public float fallMultiplier;
         public float lowJumpMultiplier = 2f;
-        public Rigidbody rigidbody;
+
+        public float speed;
+        public float jumpStrength;
         float distToGround = 0.5f;
 
         // Use this for initialization
         void Start()
         {
+            
+           
+        }
+
+        private void Awake()
+        {
+            rb = GetComponent<Rigidbody>();
+
             //Creates the canvas for UI
             _canvas = Instantiate<Canvas>(canvas);
             VelTextObject = Instantiate<Text>(velText, _canvas.transform);
             PosTextObject = Instantiate<Text>(posText, _canvas.transform);
             HighPointTextObject = Instantiate<Text>(highPointText, _canvas.transform);
 
+            //fallMultiplier = 3.0f;
+            //speed = 2.2f;
+            //jumpStrength = 10f;
         }
 
-        // Update is called once per frame
-        void FixedUpdate()
+        void FixedUpdate() // Update
         {
 
-            //Get horizonal input
-            characterMovement = new Vector3(Input.GetAxisRaw("Horizontal"), 0, 0);
+            
+            characterMovement = new Vector3(Input.GetAxisRaw("Horizontal"), 0, 0); //Get horizonal input
 
-            //Stop player movement if they are againt a wall
-            if (isLeftWalled() && characterMovement.x < 0)
+            
+            if (isLeftWalled() && characterMovement.x < 0) //Stop player movement if they are againt a wall
             {
                 characterMovement.x = 0;
             }
-            if (isRightWalled() && characterMovement.x > 0)
+            if (isRightWalled() && characterMovement.x > 0) //Stop player movement if they are againt a wall
             {
                 characterMovement.x = 0;
             }
 
             //Checks if the player is grounded then jumps when space is pressed
-            if (Input.GetKeyDown(KeyCode.Space) && isGrounded())
+            if (Input.GetKeyDown(KeyCode.Mouse0) && isGrounded())
             {
-                //characterMovement.y = 0.25f;
-                rigidbody.velocity = new Vector3(rigidbody.velocity.x, 25.25f, rigidbody.velocity.z);
+                rb.velocity = Vector3.up * jumpStrength;
+                //rb.velocity = new Vector3(rb.velocity.x, jumpStrength, rb.velocity.z);
             }
 
-            //Applies gravity to the player
-            if (characterMovement.y > 0.0f && isGrounded() == false)
+            if (rb.velocity.y < 0)
             {
-                characterMovement.y += gravity * Time.deltaTime;
+                rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
             }
-            //Makes the player fall faster
-            else if (characterMovement.y <= 0)
-            {
-                characterMovement.y += 1 * gravity * (fallMultiplier - 1) * Time.deltaTime;
-                Debug.Log("Falling");
-            }
-            rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
+
+            //Applies force to the player
+            rb.velocity = new Vector3(0, rb.velocity.y, 0);
             characterMovement.x = characterMovement.x * speed;
             characterMovement.z = characterMovement.z * speed;
 
             //Add the force to the player
-            rigidbody.AddForce(characterMovement, ForceMode.Impulse);
+            rb.AddForce(characterMovement, ForceMode.Impulse);
 
             //Update the UI text
-            VelTextObject.text = ("Velocity " + characterMovement.ToString());
-            PosTextObject.text = ("Position " + player.transform.position.ToString());
-            HighPointTextObject.text = ("" + isLeftWalled());
+            VelTextObject.text = ("Velocity " + rb.velocity.ToString());
+            PosTextObject.text = ("Position " + gameObject.transform.position.ToString());
+            HighPointTextObject.text = ("" + isRightWalled());
 
         }
 
         bool isGrounded()
         {
-            bool collision = false;
-            if ((Physics.Raycast(new Vector3(transform.position.x + 0.49f, transform.position.y, transform.position.z), -Vector3.up, distToGround + 0.1f)) || (Physics.Raycast(new Vector3(transform.position.x - 0.49f, transform.position.y, transform.position.z), -Vector3.up, distToGround + 0.1f)))
+            
+            if ((Physics.Raycast(new Vector3(transform.position.x + 0.49f, transform.position.y, transform.position.z), -Vector3.up, distToGround + 0.1f))
+                || (Physics.Raycast(new Vector3(transform.position.x - 0.49f, transform.position.y, transform.position.z), -Vector3.up, distToGround + 0.1f)))
             {
 
-                collision = true;
+                return true;
             }
-            return collision;
+            return false;
         }
 
         bool isLeftWalled()
         {
-            bool collision = false;
-            if ((Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 0.49f, transform.position.z), -Vector3.right, distToGround + 0.1f)) || (Physics.Raycast(new Vector3(transform.position.x, transform.position.y + -0.49f, transform.position.z), -Vector3.right, distToGround + 0.1f)))
+            RaycastHit hit1;
+            RaycastHit hit2;
+            Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 0.49f, transform.position.z), -Vector3.right, out hit1, distToGround + 0.01f);
+            Physics.Raycast(new Vector3(transform.position.x, transform.position.y + -0.49f, transform.position.z), -Vector3.right, out hit2, distToGround + 0.01f);
+            if (hit1.collider != null || hit2.collider != null)
             {
+                //Debug.Log("Found");
+                if (hit1.collider.tag == "green" && hit2.collider.tag == "green")
+                {
 
-                collision = true;
+                    return false;
+                }
+                return true;
             }
-            return collision;
+            return false;
         }
 
         bool isRightWalled()
         {
-            bool collision = false;
-            if ((Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 0.49f, transform.position.z), -Vector3.left, distToGround + 0.1f)) || (Physics.Raycast(new Vector3(transform.position.x, transform.position.y + -0.49f, transform.position.z), -Vector3.left, distToGround + 0.1f)))
+            RaycastHit hit1;
+            RaycastHit hit2;
+            Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 0.49f, transform.position.z), -Vector3.left, out hit1, distToGround + 0.01f);
+            Physics.Raycast(new Vector3(transform.position.x, transform.position.y + -0.49f, transform.position.z), -Vector3.left, out hit2, distToGround + 0.01f);
+            if (hit1.collider != null || hit2.collider != null)
             {
+                Debug.Log(hit1.collider.tag);
+                if (hit1.collider.tag == "green" && hit2.collider.tag == "green")
+                {
 
-                collision = true;
+                    return false;
+                }
+                return true;
             }
-            return collision;
+            return false;
         }
     }
 
